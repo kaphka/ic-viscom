@@ -1,0 +1,178 @@
+
+Aufgrund der hohen Speicherplatzanforderung habe ich mich zuerst nur auf Daten aus dem Jahr 2016 beschränkt. Die Kommentare für 2016 sind allein 80 GB groß.
+Für die Verarbeitung der Dateien habe ich das Pythonframework Dask  verwendet.
+Die Dask-API erstellt programmatisch ein Ausführungsbaum (``compute graph''),
+der dann parallel auf den Zeilen des Datensatz ausgeführt werden kann.
+Mit dem folgenden Code-Beispiel wurde die durschnittliche Länge der Kommentare gemmessen: 
+
+[language=python]
+  jsons  = lines.map(json.loads)
+  length = jsons.map(lambda data: len(data['body']))
+  freq   = length.frequencies()
+  result = client.compute(freq).gather(future)
+
+
+
+
+
+
+
+
+
+
+Dask ist ideal für die Stapelverarbeitung großer Datenmengen, aber für eine Visualisierung von Thread-Diskussionen ist nicht immer nötig den gesamten Datensatz zu filtern.
+
+Datenbank
+Die Datenbank von reddit selbst speichert alle Daten auch als key/value-Paare ab . 
+Reddit-Entwickler haben es dadurch leichter neue Features zu implementieren.
+Normalerweise müsste das Datenbankschema angepasst werden und das ist nicht trivial.
+Deswegen habe ich die gleiche Schemaart für die Datenbank der Visualisierung verwendet. 
+Als Datenbank verwende ich die relationale Datenbank Postgres.
+Die Tabelle der Kommentare hat nur zwei Reihen: id und data.
+Trotzdem kann man mit dem Datentyp jsonb direkt auf die JSON-Elemente zugreifen.
+
+Die folgende Suchanfrage findet Kommentare die einem Thread angehören und 
+braucht auf dem Datensatz von 62 Millionen Kommentaren 1:22 Minuten. 
+
+[language=sql,firstnumber=1]
+  select data from comments 
+  where 
+    data->>'link_id' = 't3_42n6x9' 
+
+
+Für Anfrage wie diese wird deswegen ein Index auf das Feld link erstellt. 
+Die gleiche Anfrage braucht mit Index nur noch 2.8s. 
+
+
+filter
+Jeder Kommentar in der Datenbank hat ein Feld parentid,
+mit der die Relation zum Elternknoten hergestellt wird.
+So einsteht am Ende eine Baumstruktur, deren Wurzel immer eine reddit-``submissions'' steht.
+reddit-``submissions'' sind Elemente aus einer Überschrift+URL oder einer Überschrift+Text  
+
+Es ist aber auch möglich die Relation 
+als Relations zwischen Usern zu verstehen ()()
+
+
+
+
+
+
+
+
+
+ 
+
+Abbildung  zeigt einen Graphen, der aus den diesen Relationen gebiltet wurde.
+Ich habe den Graphen nur Testweise erstellt, um zu sehen, ob sich die Visualisierung lohnt.
+Jedoch haben die getesteten Graphlayout-Algorithmen kein zufriedenstellendes Ergebnis geliefert.
+
+
+Populäre Reddit-Diskussionen erhalten bis zu 30000 Kommentare oder mehr,
+aber nur wenige haben ereichen eine solches Ausmaß, wie die Abbildung  zeigt. 
+
+
+
+  <Picture figures/biggest_threads_2017_1.pdf>
+  Die Menge der Kommentare ist logarithmisch auf die Einreichungen verteilt
+  
+
+
+
+
+Representationen
+
+Die Darstellung der Kommentartexte alleine übersteigt schnell die Größe eines HD-Bildschirms:
+Bei durchschnittlich 177 Zeichen pro Kommentar und z.B. 4000 Kommentaren müsste man 
+708000 Zeichen darstellen. Die Menge an Zeichen pro Textzeile ist auf etwa 80 begrenzt,
+da Texte sonst nur schwer lesbar sind. Mit einer Zeilenhöhe von etwa 22 Pixel
+sind allein für den Text fast 200000 Pixel nötig.
+
+Um trotzdem den Kontext eines Kommentares zu visualisieren habe ich ein Overview+Detail 
+Schema verwendet. Ein overview+detail Interface stellt Kontext und Detail gleichzeitig, aber 
+räumlich getrennt dar .
+Das Detail ist der Text in lesbarer Auflösung.
+Der Kontext ist die Datenstruktur des Kommentartthreads ohne Text.
+
+
+  <Picture figures/Kontext.pdf>
+  fokus + overview = Viewport
+  
+
+
+Diese Datenstruktur ist ein Baum, aber die klassische Darstellung von Bäumen 
+hat kein gutes ``data/ink''-Verhältniss .
+Zum anderen, ist die Darstellung optisch gesehen nicht sehr simpel
+(Die rote Linie in Abbildung (a) soll die ``unruhige'' optische Linie zeigen).
+Der ``icicle plot'' ist für die Darstellung von Clusterungen gedacht,
+deswegen ist die Höhe eines Knotens durch die Summe der Höhen seiner Kinder bestimmt.
+
+Für die Darstellung von Kommentaren zeichne ich aber alle Knoten mit gleicher Höhe 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+*
+
+refine
+Die Höhe des icicle plots wird an die Höhe des Browser-Viewports angepasst.
+Bei einer sehr hohen Anzahl an Knoten kann es vorkommen, dass die Höhe eines Knotens kleiner wird als 1px. 
+Die Visualisierung wird dann durch das anti aliasing des Browsers heller als gewollt (siehe Abbildung a).
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+*
+
+Durch eine Mindesthöhe wird das verhindert. Des weiteren wird die y-Position der Knoten
+auf ganzzahlige Werte gerundet, damit die Kanten schärfer dargestellt werden. 
+
+interact
+
+
+
+
+Die vorgestellte Visualisierung zeigt eine Möglichkeit die Struktur von Thread-Diskussionen sehr 
+kompakt darzustellen. 
+Die größten Schwierigkeiten lagen im Bereich der Anwendungsentwicklung und Koordination
+der heterogenen Webtechnologien.  
+
+
+
+
+
+* 
+
+
+

@@ -1,0 +1,1 @@
+﻿create index idxsub_field on comments ((data->>'subreddit'))

@@ -1,4 +1,14 @@
-node_modules
+node_modules/
+dist/
+target/
 .ipynb_checkpoints
 .secret.json
 data
+doc/latex.out
+data-test
+block-*/dist.*
+
+package-lock.json
+
+frontend/lib/
+frontend/dist/

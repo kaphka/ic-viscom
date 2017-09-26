@@ -1,0 +1,1 @@
+﻿create index idx_author_field on comments ((data->>'author'))

@@ -32,7 +32,7 @@
         <h1></h1>
         <a id="link" href="#">Download</a>
         <div id="comments"></div>
-        <svg id="cgraph" width="900" height="1400">
+        <svg id="cgraph" width="200" height="1200">
             <style>
                 .node circle {
                     fill: #999;
@@ -72,7 +72,7 @@
             .size([width, height]);
         var color = d3.scaleLinear()
             .domain([-1, 0, 1])
-            .range(["red", "white", "blue"]);
+            .range(["red", "gray", "blue"]);
 
         var timeScale = d3.scaleTime()
             .range([0, width]);

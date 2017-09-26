@@ -1,0 +1,85 @@
+@import '~basscss/css/basscss';
+@import '~dc/dc';
+$signal-red: #FF0000;
+$transparent-blue: rgba(0, 31, 255, 0.27);
+$muted-gray: #A9A9A9;
+
+$sidebarwidth: 5em;
+
+body{
+    font-size: small;
+    font-family: "Lucida Grande", "Lucida Sans Unicode", "Lucida Sans", Geneva, Verdana, sans-serif;
+
+}
+
+.sidebar{
+    position: fixed;
+    height: 100%;
+    right: 0;
+    top: 0;
+    width: $sidebarwidth;
+}
+
+.map{
+    height: 100%;
+    width: 100%;
+    // background: $muted-gray;
+    border: 0.5px solid $muted-gray;
+}
+
+.canvas-map{
+    border: 0.5px solid $muted-gray;
+    height: 100%;
+    width: 100%;
+    position: absolute;
+    top: 0;
+    left: 0;
+    // pointer-events:none;
+}
+.posmark {
+    fill: $transparent-blue;
+}
+
+p{
+    font-size: 1em;
+    line-height: 1.4285714285714286em;
+}
+
+rect.filtered{
+    fill: $signal-red;
+}
+
+
+
+#comments>div{
+    padding-left: 0.5em;
+}
+
+.comment{
+    padding-left: 1em;
+    clear: both;
+    background: white;
+}
+
+#content{
+    margin-right: $sidebarwidth;
+}
+
+.author_name {
+    color: $muted-gray;
+}
+div.comment.filtered>p.author_name {
+    color: black;
+}
+
+div.filtered {
+    color: $signal-red;
+}
+#metrics {
+    width: 100%;
+    border: 0.5px solid $muted-gray;
+}
+
+.dc-table-group{
+    display: none;
+}
